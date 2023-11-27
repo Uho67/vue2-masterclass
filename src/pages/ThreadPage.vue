@@ -22,7 +22,7 @@
 
 import PostEditor from '../components/PostEditor.vue'
 import PostList from '../components/PostList.vue'
-import {mapGetters} from 'vuex'
+import {mapActions, mapGetters} from 'vuex'
 
 export default {
   components: {
@@ -39,9 +39,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getPostsByIds: 'getPostsByIds',
-      getThreadById: 'getThreadById',
-      getTreadsByIds: 'getTreadsByIds',
       getRepliesCount: 'getRepliesCount',
       getContributorsCount: 'contributorsCount'
     }),
@@ -57,12 +54,15 @@ export default {
       type: String
     }
   },
+  methods: {
+    ...mapActions(['fetchItem', 'fetchItemsByIds'])
+  },
   async created () {
-    this.thread = await this.$store.dispatch('fetchItem', {source: 'threads', id: this.id})
+    this.thread = await this.fetchItem({source: 'threads', id: this.id})
     if (!this.thread) {
       this.$router.push('/')
     }
-    this.posts = await this.$store.dispatch('fetchItemsByIds', {source: 'posts', ids: this.thread.posts})
+    this.posts = await this.fetchItemsByIds({source: 'posts', ids: this.thread.posts})
   }
 }
 </script>

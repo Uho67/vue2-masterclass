@@ -1,5 +1,5 @@
 <template>
-  <div class="col-full push-top">
+  <div class="col-full push-top" v-if="forum">
 
     <h1>Create new thread in <i>{{ forum.name }}</i></h1>
 
@@ -30,12 +30,14 @@
   </div>
 </template>
 <script>
-import {mapGetters} from 'vuex'
+import {mapActions} from 'vuex'
 
 export default {
   name: 'EditTreadPage',
   data () {
     return {
+      forum: null,
+      thread: null,
       newTreadData: {}
     }
   },
@@ -44,29 +46,16 @@ export default {
       required: true
     }
   },
-  computed: {
-    ...mapGetters({
-      getThreadById: 'getThreadById',
-      getPostById: 'getPostById',
-      getForumById: 'getForumById'
-    }),
-    thread () {
-      return this.getThreadById(this.threadId)
-    },
-    forum () {
-      return this.getForumById(this.thread.forumId)
-    }
-  },
-  created () {
-    this.initTreadData()
+  async created () {
+    this.thread = await this.fetchItem({source: 'threads', id: this.threadId})
+    this.forum = await this.fetchItem({source: 'forums', id: this.thread.forumId})
+    const post = await this.fetchItem({source: 'posts', id: this.thread.firstPostId})
+    this.newTreadData = {title: this.thread.title, text: post.text}
   },
   methods: {
+    ...mapActions(['fetchItem', 'fetchItemsByIds']),
     cancel () {
       this.$router.push({name: 'tread.show', params: {id: this.threadId}})
-    },
-    initTreadData () {
-      const post = this.getPostById(this.thread.firstPostId)
-      this.newTreadData = {title: this.thread.title, text: post.text}
     },
     createNewTread () {
       this.$store.dispatch('updateTread', {

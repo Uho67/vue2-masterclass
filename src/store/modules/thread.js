@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import {countObjectProperties} from '@/helpers'
-import firebase from 'firebase'
 
 export default {
   state: {
@@ -17,17 +16,6 @@ export default {
       const userIds = getters.getPostsByIds(replyIds).map(post => post.userId)
       return [...new Set(userIds)].length
     },
-    getPostCount (state) {
-      return function (thread) {
-        return countObjectProperties(thread.posts)
-      }
-    },
-    getTreadsByIds (state, getters) {
-      return function (threadIds) {
-        const threadIdsArray = Object.values(threadIds)
-        return Object.values(state.threads).filter(thread => threadIdsArray.includes(thread['.key']))
-      }
-    },
     getThreadById (state, getters) {
       return function (threadId) {
         return Object.values(state.threads).find(thread => thread['.key'] === threadId)
@@ -36,15 +24,6 @@ export default {
   },
   // methods 'dispatch'
   actions: {
-    async fetchThread ({commit, state}, {id}) {
-      const database = firebase.database()
-      await database.ref('threads').child(id).once('value', itemRecord => {
-        const item = {...itemRecord.val()}
-        item['.key'] = itemRecord.key
-        commit('saveItem', {source: 'threads', item})
-      })
-      return state.threads[id]
-    },
     updateTread ({commit, getters, dispatch}, {threadId, title, firstPostText}) {
       const thread = getters.getThreadById(threadId)
       const post = getters.getPostById(thread.firstPostId)

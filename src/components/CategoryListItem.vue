@@ -20,6 +20,11 @@ import ForumList from '@/components/ForumList.vue'
 
 export default {
   name: 'CategoryListItem',
+  data () {
+    return {
+      forum: null
+    }
+  },
   components: {
     ForumList
   },
@@ -28,6 +33,9 @@ export default {
       required: true,
       type: Object
     }
+  },
+  async created () {
+    this.forum = await this.$store.dispatch('fetchItemsByIds', {source: 'forums', ids: this.category.forums})
   }
 }
 </script>

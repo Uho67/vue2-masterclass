@@ -74,7 +74,7 @@
   </div>
 </template>
 <script>
-import {mapGetters} from 'vuex'
+import {mapActions, mapGetters} from 'vuex'
 import PostList from '../components/PostList.vue'
 import UserProfileCard from '../components/UserProfileCard.vue'
 import UserProfileEditor from '../components/UserProfileEditor.vue'
@@ -100,8 +100,7 @@ export default {
   computed: {
     ...mapGetters({
       getAuthUserId: 'getAuthUserId',
-      getObjectsCount: 'getObjectsCount',
-      getPostByIds: 'getPostsByIds'
+      getObjectsCount: 'getObjectsCount'
     }),
     postsCount () {
       return this.getObjectsCount(this.user.posts)
@@ -111,14 +110,14 @@ export default {
     }
   },
   async created () {
-    debugger
-    this.user = await this.$store.dispatch('fetchItem', {source: 'users', id: this.getAuthUserId})
-    this.posts = await this.$store.dispatch('fetchItemsByIds', {
+    this.user = await this.fetchItem({source: 'users', id: this.getAuthUserId})
+    this.posts = await this.fetchItemsByIds({
       source: 'posts',
       ids: this.user.posts
     })
   },
   methods: {
+    ...mapActions(['fetchItem', 'fetchItemsByIds']),
     redirectProfilePage () {
       this.$router.push({
         name: 'profile'

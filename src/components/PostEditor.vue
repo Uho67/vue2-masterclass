@@ -41,13 +41,11 @@ export default {
       return this.post ? this.updatePost() : this.publishNewPost()
     },
     updatePost () {
-      debugger
       this.post.text = this.newPostText
       this.$store.dispatch('updatePost', this.post)
       this.$emit('postUpdated')
     },
     publishNewPost () {
-      debugger
       this.$store.dispatch('createNewPost', {
         newPostText: this.newPostText,
         threadId: this.threadId

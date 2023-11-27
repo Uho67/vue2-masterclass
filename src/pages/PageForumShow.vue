@@ -8,7 +8,7 @@
         <li class="active"><a href="#">Cooking</a></li>
       </ul>
 
-      <div class="forum-header">
+      <div v-if="forum" class="forum-header">
         <div class="forum-details">
           <h1>{{ forum.name }}</h1>
           <p class="text-lead">{{ forum.description }}</p>
@@ -57,7 +57,7 @@
     <!--    </div>-->
 
     <div class="col-full">
-      <ThreadList :threads="threads"></ThreadList>
+      <ThreadList v-if="threads" :threads="threads"></ThreadList>
     </div>
 
   </div>
@@ -65,27 +65,28 @@
 <script>
 
 import ThreadList from '@/components/ThreadList.vue'
-import {mapGetters} from 'vuex'
+import {mapActions} from 'vuex'
 
 export default {
   name: 'PageForumShow',
   components: {ThreadList},
+  data () {
+    return {
+      forum: null,
+      threads: null
+    }
+  },
   props: {
     id: {
       required: true
     }
   },
-  computed: {
-    ...mapGetters({
-      getForumById: 'getForumById',
-      getTreadsByIds: 'getTreadsByIds'
-    }),
-    forum () {
-      return this.getForumById(this.id)
-    },
-    threads () {
-      return this.getTreadsByIds(this.forum.threads)
-    }
+  methods: {
+    ...mapActions(['fetchItem', 'fetchItemsByIds'])
+  },
+  async created () {
+    this.forum = await this.fetchItem({source: 'forums', id: this.id})
+    this.threads = await this.fetchItemsByIds({source: 'threads', ids: this.forum.threads})
   }
 }
 </script>

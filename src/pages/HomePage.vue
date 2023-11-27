@@ -7,7 +7,7 @@
 <script>
 import ThreadList from '@/components/ThreadList.vue'
 import CategoryList from '@/components/CategoryList.vue'
-import {mapGetters} from 'vuex'
+import {mapActions} from 'vuex'
 
 export default {
   name: 'HomePage',
@@ -15,10 +15,16 @@ export default {
     CategoryList,
     ThreadList
   },
-  computed: {
-    ...mapGetters({
-      'categories': 'getCategories'
-    })
+  data () {
+    return {
+      categories: null
+    }
+  },
+  methods: {
+    ...mapActions(['fetchAllItems'])
+  },
+  async created () {
+    this.categories = await this.fetchAllItems({source: 'categories'})
   }
 }
 </script>

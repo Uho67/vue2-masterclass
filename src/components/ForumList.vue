@@ -17,14 +17,9 @@ export default {
     ForumListItem
   },
   props: {
-    forumIds: {
+    forums: {
       required: true,
       type: Array
-    }
-  },
-  computed: {
-    forums () {
-      return this.$store.getters.getForumsByIds(this.forumIds)
     }
   }
 }

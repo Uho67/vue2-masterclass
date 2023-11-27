@@ -7,26 +7,12 @@ export default {
   },
   // computed '.getters'
   getters: {
-    getUsers (state, getters) {
-      return state.users
-    },
     getAuthUserId (state) {
       return state.authId
-    },
-    getUserPostCount (state) {
-      return function (user) {
-        return countObjectProperties(user.posts)
-      }
     },
     getUserThreadsCount (state) {
       return function (user) {
         return countObjectProperties(user.threads)
-      }
-    },
-    getUsersByIds (state, getters) {
-      return function (userIds) {
-        const userIdsArray = Object.values(userIds)
-        return Object.values(state.users).filter(user => userIdsArray.includes(user['.key']))
       }
     },
     getAuthUser (state, getters) {

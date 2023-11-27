@@ -11,7 +11,7 @@
       >
         <p>{{ thread.title }}</p>
       </router-link>
-      <p class="text-faded text-xsmall">
+      <p v-if="threadAuthor" class="text-faded text-xsmall">
         By <a href="profile.html">{{ threadAuthor.name }}</a>,
         <AppDate :date="thread.publishedAt"/>.
       </p>
@@ -28,24 +28,25 @@
 
       <div>
         <p class="text-xsmall">
-          <a href="profile.html">{{ lastPost.name }}</a>
+          <a v-if="lastPostAuthor" href="profile.html">{{ lastPostAuthor.name }}</a>
         </p>
         <p class="text-xsmall text-faded">
-          <AppDate :date="lastPost.publishedAt"/>
+          <AppDate v-if="lastPost" :date="lastPost.publishedAt"/>
         </p>
       </div>
     </div>
   </div>
 </template>
 <script>
-import {mapGetters} from 'vuex'
+import {mapActions, mapGetters} from 'vuex'
 
 export default {
   name: 'ThreadListCard',
   data () {
     return {
       lastPost: null,
-      threadAuthor: null
+      threadAuthor: null,
+      lastPostAuthor: null
     }
   },
   props: {
@@ -59,9 +60,13 @@ export default {
       return this.getObjectsCount(this.thread.posts) - 1
     }
   },
+  methods: {
+    ...mapActions(['fetchItem'])
+  },
   async created () {
-    this.lastPost = await this.$store.dispatch('fetchItem', {source: 'posts', id: this.thread.lastPostId})
-    this.threadAuthor = await this.$store.dispatch('fetchItem', {source: 'users', id: this.thread.userId})
+    this.lastPost = await this.fetchItem(({source: 'posts', id: this.thread.lastPostId}))
+    this.lastPostAuthor = await this.fetchItem(({source: 'users', id: this.lastPost.userId}))
+    this.threadAuthor = await this.fetchItem(({source: 'users', id: this.thread.userId}))
   }
 }
 </script>

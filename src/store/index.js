@@ -3,8 +3,8 @@ import Vuex from 'vuex'
 // eslint-disable-next-line import/no-duplicates
 import {createStore} from 'vuex'
 import Vue from 'vue'
-import categoryStore from './modules/category'
-import forumStore from './modules/forum'
+import categoriesStore from './modules/category'
+import forumsStore from './modules/forum'
 import threadsStore from './modules/thread'
 import postsStore from './modules/post'
 import usersStore from './modules/user'
@@ -14,8 +14,8 @@ Vue.use(Vuex)
 // eslint-disable-next-line no-new
 export default createStore({
   modules: {
-    categoryStore,
-    forumStore,
+    categoriesStore,
+    forumsStore,
     threadsStore,
     postsStore,
     usersStore
@@ -26,6 +26,15 @@ export default createStore({
     }
   },
   actions: {
+    async fetchAllItems ({commit, state, dispatch}, {source}) {
+      await firebase.database().ref(source).once('value', snapshot => {
+        const objects = snapshot.val()
+        for (let object of Object.values(objects)) {
+          commit('saveItem', {source, item: object})
+        }
+      })
+      return state[source + 'Store'][source]
+    },
     async fetchItemsByIds ({commit, state, dispatch}, {source, ids}) {
       const itemIds = Array.isArray(ids) ? ids : Object.values(ids)
       const itemPromises = []
@@ -38,7 +47,6 @@ export default createStore({
       const database = firebase.database()
       await database.ref(source).child(id).once('value', itemRecord => {
         const item = {...itemRecord.val()}
-        item['.key'] = itemRecord.key
         commit('saveItem', {source, item})
       })
       return state[source + 'Store'][source][id]
@@ -46,6 +54,9 @@ export default createStore({
   },
   mutations: {
     saveItem (state, {source, item}) {
+      if (!item['.key']) {
+        item['.key'] = item['key']
+      }
       Vue.set(state[source + 'Store'][source], item['.key'], item)
     }
   }
