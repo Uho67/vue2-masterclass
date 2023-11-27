@@ -27,30 +27,30 @@
   </div>
 </template>
 <script>
-import {mapGetters} from 'vuex'
+import { countObjectProperties } from '@/helpers'
 
 export default {
   name: 'UserProfileCard',
-  computed: {
-    ...mapGetters({
-      getUserById: 'getUserById',
-      getUserPostCount: 'getUserPostCount',
-      getUserThreadsCount: 'getUserThreadsCount'
-    }),
-    user () {
-      return this.getUserById(this.userId)
-    },
-    userPostCount () {
-      return this.getUserPostCount(this.user)
-    },
-    userThreadsCount () {
-      return this.getUserThreadsCount(this.user)
+  data () {
+    return {
+      user: null
     }
   },
   props: {
     userId: {
       required: true
     }
+  },
+  computed: {
+    userPostCount () {
+      return countObjectProperties(this.user.posts)
+    },
+    userThreadsCount () {
+      return countObjectProperties(this.user.threads)
+    }
+  },
+  created () {
+    this.user = this.$store.dispatch('fetchItem', {source: 'users', id: this.userId})
   }
 }
 </script>

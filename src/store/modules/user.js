@@ -1,15 +1,17 @@
-import sourceData from '@/data.json'
 import Vue from 'vue'
 import { countObjectProperties } from '@/helpers'
 export default {
   state: {
-    users: {...sourceData.users},
+    users: {},
     authId: '7uVPJS9GHoftN58Z2MXCYDqmNAh2'
   },
   // computed '.getters'
   getters: {
     getUsers (state, getters) {
       return state.users
+    },
+    getAuthUserId (state) {
+      return state.authId
     },
     getUserPostCount (state) {
       return function (user) {

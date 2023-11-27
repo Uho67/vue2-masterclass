@@ -71,18 +71,17 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getUserById: 'getUserById',
-      getUserPostCount: 'getUserPostCount',
-      getUserThreadsCount: 'getUserThreadsCount'
+      getObjectsCount: 'getObjectsCount',
+      getUserById: 'getUserById'
     }),
     user () {
       return this.getUserById(this.userId)
     },
     userPostCount () {
-      return this.getUserPostCount(this.user)
+      return this.getObjectsCount(this.user.posts)
     },
     userThreadsCount () {
-      return this.getUserThreadsCount(this.user)
+      return this.getObjectsCount(this.user.threads)
     }
   },
   beforeMount () {

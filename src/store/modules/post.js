@@ -1,9 +1,8 @@
-import sourceData from '@/data.json'
 import Vue from 'vue'
 
 export default {
   state: {
-    posts: {...sourceData.posts}
+    posts: {}
   },
   // computed '.getters'
   getters: {
@@ -44,7 +43,7 @@ export default {
         post.edited = {}
       }
       post.edited.at = Math.floor(Date.now() / 1000)
-      post.edited.by = rootState.userStore.authId
+      post.edited.by = rootState.usersStore.authId
       commit('addPost', post)
     }
   },

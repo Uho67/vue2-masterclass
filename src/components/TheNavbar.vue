@@ -16,7 +16,7 @@
     <nav class="navbar">
       <ul>
 
-        <li class="navbar-user">
+        <li class="navbar-user" v-if="user">
           <a href="#">
             <img class="avatar-small" :src="user.avatar" alt="">
             <span>
@@ -69,10 +69,16 @@
 import {mapGetters} from 'vuex'
 export default {
   name: 'TheNavbar',
+  data () {
+    return {
+      user: null
+    }
+  },
   computed: {
-    ...mapGetters({
-      user: 'getAuthUser'
-    })
+    ...mapGetters(['getAuthUserId'])
+  },
+  async created () {
+    this.user = await this.$store.dispatch('fetchItem', {source: 'users', id: this.getAuthUserId})
   }
 }
 </script>

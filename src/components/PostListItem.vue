@@ -1,6 +1,6 @@
 <template>
   <div>
-    <UserInfoCard :user="user"/>
+    <UserInfoCard v-if="user" :user="user"/>
     <div class="post-content">
       <template v-if="!editMode">
         <div>
@@ -40,6 +40,7 @@ export default {
   },
   data () {
     return {
+      user: null,
       editMode: false
     }
   },
@@ -49,10 +50,8 @@ export default {
       type: Object
     }
   },
-  computed: {
-    user () {
-      return this.$store.getters.getUserById(this.post.userId)
-    }
+  async created () {
+    this.user = await this.$store.dispatch('fetchItem', {source: 'users', id: this.post.userId})
   }
 }
 </script>

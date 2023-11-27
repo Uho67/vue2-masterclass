@@ -13,8 +13,7 @@
       </router-link>
       <p class="text-faded text-xsmall">
         By <a href="profile.html">{{ threadAuthor.name }}</a>,
-        <AppDate :date="thread.publishedAt"/>
-        .
+        <AppDate :date="thread.publishedAt"/>.
       </p>
     </div>
 
@@ -29,7 +28,7 @@
 
       <div>
         <p class="text-xsmall">
-          <a href="profile.html">{{ lastPostUserName }}</a>
+          <a href="profile.html">{{ lastPost.name }}</a>
         </p>
         <p class="text-xsmall text-faded">
           <AppDate :date="lastPost.publishedAt"/>
@@ -39,34 +38,30 @@
   </div>
 </template>
 <script>
-import {mapState, mapGetters} from 'vuex'
+import {mapGetters} from 'vuex'
 
 export default {
   name: 'ThreadListCard',
+  data () {
+    return {
+      lastPost: null,
+      threadAuthor: null
+    }
+  },
   props: {
     thread: {
       required: true
     }
   },
   computed: {
-    ...mapState(['users']),
-    ...mapGetters({
-      getPostById: 'getPostById',
-      getUserById: 'getUserById',
-      getPostCount: 'getPostCount'
-    }),
-    threadAuthor () {
-      return this.getUserById(this.thread.userId)
-    },
+    ...mapGetters(['getObjectsCount']),
     countOfReply () {
-      return this.getPostCount(this.thread) - 1
-    },
-    lastPost () {
-      return this.getPostById(this.thread.lastPostId)
-    },
-    lastPostUserName () {
-      return this.lastPost.name
+      return this.getObjectsCount(this.thread.posts) - 1
     }
+  },
+  async created () {
+    this.lastPost = await this.$store.dispatch('fetchItem', {source: 'posts', id: this.thread.lastPostId})
+    this.threadAuthor = await this.$store.dispatch('fetchItem', {source: 'users', id: this.thread.userId})
   }
 }
 </script>

@@ -1,10 +1,10 @@
-import sourceData from '@/data.json'
 import Vue from 'vue'
-import { countObjectProperties } from '@/helpers'
+import {countObjectProperties} from '@/helpers'
+import firebase from 'firebase'
 
 export default {
   state: {
-    threads: {...sourceData.threads}
+    threads: {}
   },
   // computed '.getters'
   getters: {
@@ -36,6 +36,15 @@ export default {
   },
   // methods 'dispatch'
   actions: {
+    async fetchThread ({commit, state}, {id}) {
+      const database = firebase.database()
+      await database.ref('threads').child(id).once('value', itemRecord => {
+        const item = {...itemRecord.val()}
+        item['.key'] = itemRecord.key
+        commit('saveItem', {source: 'threads', item})
+      })
+      return state.threads[id]
+    },
     updateTread ({commit, getters, dispatch}, {threadId, title, firstPostText}) {
       const thread = getters.getThreadById(threadId)
       const post = getters.getPostById(thread.firstPostId)
@@ -57,15 +66,15 @@ export default {
           userId: getters.getAuthUser['.key']
         }
         commit('saveTread', tread)
-        dispatch('createNewPost', { newPostText: firstPostText, threadId: tread['.key'] })
-          .then(postId => {
-            const thread = getters.getThreadById(tread['.key'])
-            Vue.set(thread, 'firstPostId', postId)
-          })
+        dispatch('createNewPost', {newPostText: firstPostText, threadId: tread['.key']})
+                             .then(postId => {
+                               const thread = getters.getThreadById(tread['.key'])
+                               Vue.set(thread, 'firstPostId', postId)
+                             })
         commit('addThreadToForum', {treadId: tread['.key'], forumId: forumId})
         resolve(tread['.key'])
       }
-    )
+      )
     },
     addPostToTread ({commit}, {threadId, postId}) {
       commit('addPostToThread', {threadId, postId})

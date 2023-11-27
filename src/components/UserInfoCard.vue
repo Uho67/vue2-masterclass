@@ -16,7 +16,6 @@
 </template>
 <script>
 import {mapGetters} from 'vuex'
-
 export default {
   name: 'UserInfoCard',
   data () {
@@ -24,13 +23,14 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getUserThreadsCount: 'getUserThreadsCount'
+      getUserThreadsCount: 'getUserThreadsCount',
+      getObjectsCount: 'getObjectsCount'
     }),
     treadsCount () {
-      return this.getUserThreadsCount(this.user)
+      return this.getObjectsCount(this.user.threads)
     },
     postCount () {
-      return Object.keys(this.user.posts).length
+      return this.getObjectsCount(this.user.posts)
     }
   },
   props: {

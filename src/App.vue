@@ -8,10 +8,7 @@
 </template>
 
 <script>
-import sourceData from '@/data.json'
 import TheNavbar from './components/TheNavbar.vue'
-
-console.log(sourceData)
 export default {
   components: {
     TheNavbar

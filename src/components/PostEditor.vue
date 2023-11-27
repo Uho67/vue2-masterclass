@@ -38,7 +38,6 @@ export default {
   },
   methods: {
     save () {
-      debugger
       return this.post ? this.updatePost() : this.publishNewPost()
     },
     updatePost () {

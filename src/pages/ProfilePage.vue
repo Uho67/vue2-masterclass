@@ -1,16 +1,17 @@
 <template>
   <div class="flex-grid">
     <div class="col-3 push-top">
-
-      <UserProfileCard
-        v-if="!editMode"
-        :userId="user['.key']"
-      />
-      <UserProfileEditor
-        v-if="editMode"
-        :userId="user['.key']"
-        @cancelEditMode="redirectProfilePage"
-      />
+      <template v-if="user">
+        <UserProfileCard
+          v-if="!editMode"
+          :userId="user['.key']"
+        />
+        <UserProfileEditor
+          v-if="editMode"
+          :userId="user['.key']"
+          @cancelEditMode="redirectProfilePage"
+        />
+      </template>
       <!--      <div class="profile-card">-->
 
       <!--        <p class="text-center">-->
@@ -60,7 +61,7 @@
     <div class="col-7 push-top">
 
       <div class="profile-header">
-                  <span class="text-lead">
+                  <span class="text-lead" v-if="user">
                       {{ user.name }}'s recent activity
                   </span>
         <a href="#">See only started threads?</a>
@@ -77,8 +78,15 @@ import {mapGetters} from 'vuex'
 import PostList from '../components/PostList.vue'
 import UserProfileCard from '../components/UserProfileCard.vue'
 import UserProfileEditor from '../components/UserProfileEditor.vue'
+
 export default {
   name: 'UserProfilePage',
+  data () {
+    return {
+      user: null,
+      posts: null
+    }
+  },
   components: {
     PostList,
     UserProfileCard,
@@ -91,20 +99,24 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: 'getAuthUser',
-      getUserPostCount: 'getUserPostCount',
-      getUserThreadsCount: 'getUserThreadsCount',
+      getAuthUserId: 'getAuthUserId',
+      getObjectsCount: 'getObjectsCount',
       getPostByIds: 'getPostsByIds'
     }),
     postsCount () {
-      return this.getUserPostCount(this.user)
+      return this.getObjectsCount(this.user.posts)
     },
     threadsCount () {
-      return this.getUserThreadsCount(this.user)
-    },
-    posts () {
-      return this.getPostByIds(this.user.posts)
+      return this.getObjectsCount(this.user.threads)
     }
+  },
+  async created () {
+    debugger
+    this.user = await this.$store.dispatch('fetchItem', {source: 'users', id: this.getAuthUserId})
+    this.posts = await this.$store.dispatch('fetchItemsByIds', {
+      source: 'posts',
+      ids: this.user.posts
+    })
   },
   methods: {
     redirectProfilePage () {

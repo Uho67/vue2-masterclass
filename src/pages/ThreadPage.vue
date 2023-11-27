@@ -1,5 +1,5 @@
 <template>
-  <div class="col-large push-top">
+  <div class="col-large push-top" v-if="thread">
     <h1>{{ thread.title }}</h1>
     <router-link
       tag="button"
@@ -32,7 +32,8 @@ export default {
   name: 'ThreadPage',
   data () {
     return {
-      thread: this.$store.getters.getThreadById(this.id),
+      thread: null,
+      posts: {},
       newPostText: ''
     }
   },
@@ -49,9 +50,6 @@ export default {
     },
     repliesCount () {
       return this.getRepliesCount(this.thread['.key'])
-    },
-    posts () {
-      return this.$store.getters.getPostsByIds(this.thread.posts)
     }
   },
   props: {
@@ -59,10 +57,12 @@ export default {
       type: String
     }
   },
-  beforeMount () {
-    if (!this.getTreadsByIds([this.id]).length) {
+  async created () {
+    this.thread = await this.$store.dispatch('fetchItem', {source: 'threads', id: this.id})
+    if (!this.thread) {
       this.$router.push('/')
     }
+    this.posts = await this.$store.dispatch('fetchItemsByIds', {source: 'posts', ids: this.thread.posts})
   }
 }
 </script>
