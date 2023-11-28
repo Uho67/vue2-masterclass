@@ -14,6 +14,8 @@
   </form>
 </template>
 <script>
+import {mapActions} from 'vuex'
+
 export default {
   name: 'PostEditor',
   data () {
@@ -37,6 +39,7 @@ export default {
     this.newPostText = this.post ? this.post.text : ''
   },
   methods: {
+    ...mapActions(['createNewPost']),
     save () {
       return this.post ? this.updatePost() : this.publishNewPost()
     },
@@ -45,11 +48,8 @@ export default {
       this.$store.dispatch('updatePost', this.post)
       this.$emit('postUpdated')
     },
-    publishNewPost () {
-      this.$store.dispatch('createNewPost', {
-        newPostText: this.newPostText,
-        threadId: this.threadId
-      })
+    async publishNewPost () {
+      await this.createNewPost({newPostText: this.newPostText, threadId: this.threadId})
       this.newPostText = ''
     }
   }

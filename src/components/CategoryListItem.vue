@@ -11,7 +11,7 @@
       >
         <h2 class="list-title"> {{ category.name }} </h2>
       </router-link>
-      <ForumList :forumIds="Object.values(category.forums)"></ForumList>
+      <ForumList v-if="forums" :forums="forums"></ForumList>
     </div>
   </div>
 </template>
@@ -22,7 +22,7 @@ export default {
   name: 'CategoryListItem',
   data () {
     return {
-      forum: null
+      forums: null
     }
   },
   components: {
@@ -35,7 +35,7 @@ export default {
     }
   },
   async created () {
-    this.forum = await this.$store.dispatch('fetchItemsByIds', {source: 'forums', ids: this.category.forums})
+    this.forums = await this.$store.dispatch('fetchItemsByIds', {source: 'forums', ids: this.category.forums})
   }
 }
 </script>

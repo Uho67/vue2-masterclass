@@ -1,5 +1,5 @@
 <template>
-  <div class="col-full push-top">
+  <div v-if="forum" class="col-full push-top">
 
     <h1>Create new thread in <i>{{ forum.name }}</i></h1>
 
@@ -30,7 +30,7 @@
   </div>
 </template>
 <script>
-import {mapGetters} from 'vuex'
+import {mapActions, mapGetters} from 'vuex'
 
 export default {
   name: 'NewTreadPage',
@@ -49,10 +49,11 @@ export default {
       getForumById: 'getForumById'
     }),
     forum () {
-      return this.getForumById(this.forumId)
+      return this.fetchItem({source: 'forums', id: this.forumId})
     }
   },
   methods: {
+    ...mapActions(['fetchItem']),
     cancel () {
       this.$router.push({name: 'forum.show', params: {id: this.forumId}})
     },

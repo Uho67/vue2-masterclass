@@ -29,5 +29,8 @@ new Vue({
   store,
   router,
   template: '<App/>',
-  components: { App }
+  components: { App },
+  async created () {
+    await store.dispatch('fetchItem', {source: 'users', id: store.getters.getAuthUserId})
+  }
 })

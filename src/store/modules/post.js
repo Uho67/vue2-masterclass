@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import firebase from 'firebase'
 
 export default {
   state: {
@@ -6,9 +7,6 @@ export default {
   },
   // computed '.getters'
   getters: {
-    getPosts (state, getters) {
-      return state.post
-    },
     getPostsByIds (state, getters) {
       return function (postIds) {
         const postIdsArray = Object.values(postIds)
@@ -22,21 +20,29 @@ export default {
     }
   },
   actions: {
-    createNewPost ({commit, getters}, {newPostText, threadId}) {
-      return new Promise((resolve, reject) => {
-        const post = {
-          'text': newPostText,
-          'publishedAt': Math.floor(Date.now() / 1000),
-          '.key': 'customPost' + Date.now(),
-          'threadId': threadId,
-          'userId': getters.getAuthUser['.key']
-        }
-        commit('addPost', post)
-        commit('addPostToThread', {threadId: post.threadId, postId: post['.key']})
-        commit('addPostToUser', {userId: post.userId, postId: post['.key']})
-        resolve(post['.key'])
+    async createNewPost ({commit, getters, dispatch}, {newPostText, threadId, postKey}) {
+      debugger
+      const postId = postKey || firebase.database().ref('posts').push().key
+      const post = {
+        'key': postId,
+        'text': newPostText,
+        'publishedAt': Math.floor(Date.now() / 1000),
+        'threadId': threadId,
+        'userId': getters.getAuthUser['.key']
       }
-    )
+      await dispatch('updatePostFirebaseTransaction', post)
+      commit('saveItem', {source: 'posts', item: post})
+      commit('addPostToThread', {threadId: post.threadId, postId: post['.key']})
+      commit('addPostToUser', {userId: post.userId, postId: post['.key']})
+      return post['.key']
+    },
+    updatePostFirebaseTransaction ({commit}, post) {
+      const postId = post['key']
+      const updates = {}
+      updates[`posts/${postId}`] = post
+      updates[`threads/${post.threadId}/posts/${postId}`] = postId
+      updates[`users/${post.userId}/posts/${postId}`] = postId
+      firebase.database().ref().update(updates)
     },
     updatePost ({rootState, commit}, post) {
       if (typeof post.edited !== 'object') {

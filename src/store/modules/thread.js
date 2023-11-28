@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import {countObjectProperties} from '@/helpers'
+import firebase from 'firebase'
 
 export default {
   state: {
@@ -8,13 +9,8 @@ export default {
   // computed '.getters'
   getters: {
     getRepliesCount: state => id => countObjectProperties(state.threads[id].posts) - 1,
-    getTreads (state, getters) {
-      return state.thread
-    },
     contributorsCount: (state, getters) => id => {
-      const replyIds = Object.values(state.threads[id].posts).filter(postId => postId !== state.threads[id].firstPostId)
-      const userIds = getters.getPostsByIds(replyIds).map(post => post.userId)
-      return [...new Set(userIds)].length
+      return countObjectProperties(state.threads[id].contributors)
     },
     getThreadById (state, getters) {
       return function (threadId) {
@@ -34,26 +30,40 @@ export default {
         commit('saveTread', thread)
       }
     },
-    createTread ({commit, getters, dispatch}, {forumId, title, firstPostText}) {
-      return new Promise((resolve, reject) => {
-        const tread = {
-          '.key': 'newTread' + Date.now(),
-          forumId: forumId,
-          posts: {},
-          publishedAt: Math.floor(Date.now() / 1000),
-          title: title,
-          userId: getters.getAuthUser['.key']
-        }
-        commit('saveTread', tread)
-        dispatch('createNewPost', {newPostText: firstPostText, threadId: tread['.key']})
-                             .then(postId => {
-                               const thread = getters.getThreadById(tread['.key'])
-                               Vue.set(thread, 'firstPostId', postId)
-                             })
-        commit('addThreadToForum', {treadId: tread['.key'], forumId: forumId})
-        resolve(tread['.key'])
+    async createTread ({commit, getters, dispatch}, {forumId, title, firstPostText}) {
+      const threadKey = firebase.database().ref('threads').push().key
+      const postKey = firebase.database().ref('posts').push().key
+      const thread = {
+        'key': threadKey,
+        forumId: forumId,
+        lastPostId: postKey,
+        firstPostId: postKey,
+        posts: {
+          postKey: postKey
+        },
+        publishedAt: Math.floor(Date.now() / 1000),
+        title: title,
+        userId: getters.getAuthUser['.key']
       }
-      )
+      await dispatch('updateThreadFirebaseTransaction', thread)
+      debugger
+      await dispatch('createNewPost', {
+        newPostText: firstPostText,
+        threadId: threadKey,
+        postId: postKey
+      })
+      commit('saveItem', {source: 'threads', item: thread})
+      commit('addThreadToForum', {treadId: thread['.key'], forumId: forumId})
+      return thread['.key']
+    },
+    async updateThreadFirebaseTransaction ({dispatch}, thread) {
+      const threadId = thread['key']
+      const updates = {}
+      updates[`threads/${threadId}`] = thread
+      updates[`forums/${thread.forumId}/threads/${threadId}`] = threadId
+      updates[`users/${thread.userId}/threads/${threadId}`] = threadId
+      firebase.database().ref().update(updates)
+      return dispatch('fetchItem', {source: 'threads', id: threadId})
     },
     addPostToTread ({commit}, {threadId, postId}) {
       commit('addPostToThread', {threadId, postId})

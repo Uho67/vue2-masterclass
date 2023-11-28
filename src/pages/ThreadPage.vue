@@ -33,20 +33,23 @@ export default {
   data () {
     return {
       thread: null,
-      posts: {},
       newPostText: ''
     }
   },
   computed: {
     ...mapGetters({
       getRepliesCount: 'getRepliesCount',
-      getContributorsCount: 'contributorsCount'
+      getContributorsCount: 'contributorsCount',
+      getPostsByIds: 'getPostsByIds'
     }),
     contributorsCount () {
       return this.getContributorsCount(this.thread['.key'])
     },
     repliesCount () {
       return this.getRepliesCount(this.thread['.key'])
+    },
+    posts () {
+      return this.getPostsByIds(this.thread.posts)
     }
   },
   props: {
@@ -62,7 +65,7 @@ export default {
     if (!this.thread) {
       this.$router.push('/')
     }
-    this.posts = await this.fetchItemsByIds({source: 'posts', ids: this.thread.posts})
+    await this.fetchItemsByIds({source: 'posts', ids: this.thread.posts})
   }
 }
 </script>
