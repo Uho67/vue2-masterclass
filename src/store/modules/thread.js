@@ -46,7 +46,6 @@ export default {
         userId: getters.getAuthUser['.key']
       }
       await dispatch('updateThreadFirebaseTransaction', thread)
-      debugger
       await dispatch('createNewPost', {
         newPostText: firstPostText,
         threadId: threadKey,

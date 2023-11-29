@@ -41,15 +41,21 @@ export default {
       const updates = {}
       updates[`posts/${postId}`] = post
       updates[`threads/${post.threadId}/posts/${postId}`] = postId
+      updates[`threads/${post.threadId}/contributors/${post.userId}`] = post.userId
       updates[`users/${post.userId}/posts/${postId}`] = postId
       firebase.database().ref().update(updates)
     },
-    updatePost ({rootState, commit}, post) {
+    async updatePost ({rootState, commit}, post) {
       if (typeof post.edited !== 'object') {
         post.edited = {}
       }
       post.edited.at = Math.floor(Date.now() / 1000)
       post.edited.by = rootState.usersStore.authId
+      debugger
+      let updates = {}
+      updates.text = post.text
+      updates.edited = post.edited
+      await firebase.database().ref('posts').child(post['.key']).update(updates)
       commit('addPost', post)
     }
   },
