@@ -3,7 +3,7 @@
 
     <h1>Create new thread in <i>{{ forum.name }}</i></h1>
 
-    <form action="" @submit.prevent="createNewTread">
+    <form action="" @submit.prevent="updateThread">
       <div class="form-group">
         <label for="thread_title">Title:</label>
         <input type="text" id="thread_title" class="form-input" name="title"
@@ -57,12 +57,10 @@ export default {
     cancel () {
       this.$router.push({name: 'tread.show', params: {id: this.threadId}})
     },
-    createNewTread () {
-      this.$store.dispatch('updateTread', {
-        threadId: this.thread['.key'],
-        title: this.newTreadData.title,
-        firstPostText: this.newTreadData.text
-      }).then(threadId => this.$router.push({name: 'tread.show', params: {id: threadId}}))
+    async updateThread () {
+      const threadId = await this.$store.dispatch('updateTread', {threadId: this.thread['.key'], title: this.newTreadData.title, firstPostText: this.newTreadData.text})
+      debugger
+      this.$router.push({name: 'tread.show', params: {id: threadId}})
     }
   }
 }

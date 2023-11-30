@@ -8,6 +8,7 @@
 import ThreadList from '@/components/ThreadList.vue'
 import CategoryList from '@/components/CategoryList.vue'
 import {mapActions} from 'vuex'
+import asyncDataStatus from '../mixins/asyncDataStatus'
 
 export default {
   name: 'HomePage',
@@ -15,6 +16,7 @@ export default {
     CategoryList,
     ThreadList
   },
+  mixins: [asyncDataStatus],
   data () {
     return {
       categories: null
@@ -24,7 +26,9 @@ export default {
     ...mapActions(['fetchAllItems'])
   },
   async created () {
+    this.startDataLoading()
     this.categories = await this.fetchAllItems({source: 'categories'})
+    setTimeout(() => { this.dataLoaded() }, 3000)
   }
 }
 </script>

@@ -8,7 +8,7 @@
         <li class="active"><a href="#">Cooking</a></li>
       </ul>
 
-      <div v-if="forum" class="forum-header">
+      <div v-if="!isAsyncDataLoading" class="forum-header">
         <div class="forum-details">
           <h1>{{ forum.name }}</h1>
           <p class="text-lead">{{ forum.description }}</p>
@@ -66,10 +66,12 @@
 
 import ThreadList from '@/components/ThreadList.vue'
 import {mapActions} from 'vuex'
+import asyncDataStatus from '../mixins/asyncDataStatus'
 
 export default {
   name: 'PageForumShow',
   components: {ThreadList},
+  mixins: [asyncDataStatus],
   data () {
     return {
       forum: null,
@@ -85,8 +87,12 @@ export default {
     ...mapActions(['fetchItem', 'fetchItemsByIds'])
   },
   async created () {
+    this.$emit('startLoader')
+    this.startDataLoading()
     this.forum = await this.fetchItem({source: 'forums', id: this.id})
     this.threads = await this.fetchItemsByIds({source: 'threads', ids: this.forum.threads})
+    this.dataLoaded()
+    this.$emit('stopLoader')
   }
 }
 </script>

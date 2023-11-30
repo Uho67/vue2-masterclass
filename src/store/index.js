@@ -43,7 +43,7 @@ export default createStore({
       }
       return Promise.all(itemPromises)
     },
-    async fetchItem ({commit, state}, {source, id}) {
+    async fetchItem ({commit, state}, {source = false, id = 1}) {
       const database = firebase.database()
       await database.ref(source).child(id).once('value', itemRecord => {
         const item = {...itemRecord.val()}

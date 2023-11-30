@@ -20,14 +20,15 @@ export default {
   },
   // methods 'dispatch'
   actions: {
-    updateTread ({commit, getters, dispatch}, {threadId, title, firstPostText}) {
+    async updateTread ({commit, getters, dispatch}, {threadId, title, firstPostText}) {
       const thread = getters.getThreadById(threadId)
       const post = getters.getPostById(thread.firstPostId)
       if (post && thread) {
         post.text = firstPostText
         dispatch('updatePost', post)
-        thread.title = title
+        await firebase.database().ref('threads').child(thread['.key']).child('title').set(title)
         commit('saveTread', thread)
+        return thread['.key']
       }
     },
     async createTread ({commit, getters, dispatch}, {forumId, title, firstPostText}) {

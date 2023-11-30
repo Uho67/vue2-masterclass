@@ -1,5 +1,5 @@
 <template>
-  <div class="col-large push-top" v-if="thread">
+  <div class="col-large push-top" v-if="!isAsyncDataLoading">
     <h1>{{ thread.title }}</h1>
     <router-link
       tag="button"
@@ -14,7 +14,7 @@
       By <a href="#" class="link-unstyled">Robin</a>, 2 hours ago.
       <span style="float:right; margin-top: 2px;" class="hide-mobile text-faded text-small">{{ repliesCount }} replies by {{ contributorsCount }} contributors</span>
     </p>
-    <PostList :posts="posts"/>
+    <PostList v-if="posts" :posts="posts"/>
     <PostEditor :threadId="thread['.key']"/>
   </div>
 </template>
@@ -23,6 +23,7 @@
 import PostEditor from '../components/PostEditor.vue'
 import PostList from '../components/PostList.vue'
 import {mapActions, mapGetters} from 'vuex'
+import asyncDataStatus from '../mixins/asyncDataStatus'
 
 export default {
   components: {
@@ -30,6 +31,7 @@ export default {
     PostEditor
   },
   name: 'ThreadPage',
+  mixins: [asyncDataStatus],
   data () {
     return {
       thread: null,
@@ -49,6 +51,7 @@ export default {
       return this.getRepliesCount(this.thread['.key'])
     },
     posts () {
+      debugger
       return this.getPostsByIds(this.thread.posts)
     }
   },
@@ -61,11 +64,14 @@ export default {
     ...mapActions(['fetchItem', 'fetchItemsByIds'])
   },
   async created () {
-    this.thread = await this.fetchItem({source: 'threads', id: this.id})
+    this.startDataLoading()
+    this.thread = await this.$store.dispatch('fetchItem', {source: 'threads', id: this.id})
     if (!this.thread) {
+      this.dataLoaded()
       this.$router.push('/')
     }
-    await this.fetchItemsByIds({source: 'posts', ids: this.thread.posts})
+    await this.$store.dispatch('fetchItemsByIds', {source: 'posts', ids: this.thread.posts})
+    this.dataLoaded()
   }
 }
 </script>

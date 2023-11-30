@@ -51,7 +51,6 @@ export default {
       }
       post.edited.at = Math.floor(Date.now() / 1000)
       post.edited.by = rootState.usersStore.authId
-      debugger
       let updates = {}
       updates.text = post.text
       updates.edited = post.edited
